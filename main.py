@@ -70,18 +70,54 @@ def add_data():
         session.add(model(id=record['pk'], **record['fields']))
     return
 
-login = 'postgres'
-password = 'Tehn89tehn'
-base = 'db6'
-DSN = f'postgresql://{login}:{password}@localhost:5432/{base}'
-engine = sqlalchemy.create_engine(DSN)
+def get_shop(pub_name, pub_id='0'):
+    """
+    Функция выводит информацию о магазинах где имеется книга необходимого издателя
+    :param pub_name: столбец name в таблице publisher
+    :param pub_id: столбец id в таблице publisher
+    :return:
+    """
+    id = int(pub_id)
+    if len(pub_name) != 0:
+        q = session.query(Shop).join(Stock, Stock.id_shop == Shop.id).join(Book, Book.id == Stock.id_book).\
+            join(Publisher, Publisher.id == Book.id_publisher).filter(Publisher.name == pub_name)
+        pb = session.query(Publisher).filter(Publisher.name == pub_name)
+        for p in pb.all():
+            print(f'Издатель "{p.name}" с id {p.id} продается в магазине(ах):')
+            for s in q.all():
+                print('\t', s.name)
+    elif id != 0:
+        q = session.query(Shop).join(Stock, Stock.id_shop == Shop.id).join(Book, Book.id == Stock.id_book). \
+            join(Publisher, Publisher.id == Book.id_publisher).filter(Publisher.id == id)
+        pb = session.query(Publisher).filter(Publisher.id == id)
+        for p in pb.all():
+            print(f'Издатель "{p.name}" с id {p.id} продается в магазине(ах):')
+            for s in q.all():
+                print('\t', s.name)
+        return
 
-create_tables(engine)
+if __name__ == '__main__':
+    login = 'postgres'
+    password = 'Tehn89tehn'
+    base = 'db6'
+    DSN = f'postgresql://{login}:{password}@localhost:5432/{base}'
+    engine = sqlalchemy.create_engine(DSN)
+    create_tables(engine)
 
-Session = sessionmaker(bind=engine)
-session = Session()
-add_data()
-session.commit()
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    add_data()
+    session.commit()
+
+    name_book = input('Введите имя издателя, если Вам известен только id введите его в следующем окне: ')
+    id_book = input('Введите id издателя: ')
+    if len(name_book) != 0:
+        get_shop(name_book)
+    elif len(id_book) != 0:
+        get_shop(name_book, id_book)
+    else:
+        print('Данные об издетеле не введены')
+
 
 
 
