@@ -1,6 +1,6 @@
 import json
 
-import sqlalchemy
+
 import sqlalchemy as sq
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 
@@ -101,7 +101,7 @@ if __name__ == '__main__':
     password = 'Tehn89tehn'
     base = 'db6'
     DSN = f'postgresql://{login}:{password}@localhost:5432/{base}'
-    engine = sqlalchemy.create_engine(DSN)
+    engine = sq.create_engine(DSN)
     create_tables(engine)
 
     Session = sessionmaker(bind=engine)
